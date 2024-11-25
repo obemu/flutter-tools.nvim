@@ -12,8 +12,9 @@ local utils = lazy.require("flutter-tools.utils") ---@module "flutter-tools.util
 ---@field dart_define? {[string]: string}
 ---@field dart_define_from_file? string
 ---@field flutter_mode? string
----@field web_port? number
+---@field web_port? string
 ---@field cwd? string full path of current working directory, defaults to LSP root
+---@field additional_args? string[] additional arguments to pass to the flutter run command
 
 local M = {}
 
@@ -112,6 +113,7 @@ local config = {
     filter = nil,
     enabled = true,
     notify_errors = false,
+    focus_on_open = true,
   }, {
     __index = function(_, k) return k == "open_cmd" and get_split_cmd(0.4, 50) or nil end,
   }),

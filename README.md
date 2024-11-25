@@ -50,14 +50,14 @@ using `vim-plug`
 ```vim
 Plug 'nvim-lua/plenary.nvim'
 Plug 'stevearc/dressing.nvim' " optional for vim.ui.select
-Plug 'akinsho/flutter-tools.nvim'
+Plug 'nvim-flutter/flutter-tools.nvim'
 ```
 
 using `packer.nvim`
 
 ```lua
 use {
-    'akinsho/flutter-tools.nvim',
+    'nvim-flutter/flutter-tools.nvim',
     requires = {
         'nvim-lua/plenary.nvim',
         'stevearc/dressing.nvim', -- optional for vim.ui.select
@@ -69,7 +69,7 @@ using `lazy.nvim`
 
 ```lua
 {
-    'akinsho/flutter-tools.nvim',
+    'nvim-flutter/flutter-tools.nvim',
     lazy = false,
     dependencies = {
         'nvim-lua/plenary.nvim',
@@ -165,6 +165,9 @@ require("flutter-tools").setup {} -- use defaults
 - `FlutterSuper` - Go to super class, method using custom LSP method `dart/textDocument/super`.
 - `FlutterReanalyze` - Forces LSP server reanalyze using custom LSP method `dart/reanalyze`.
 - `FlutterRename` - Renames and updates imports if `lsp.settings.renameFilesWithClasses == "always"`
+- `FlutterLogClear` - Clears the log buffer.
+- `FlutterLogToggle` - Toggles the log buffer.
+
 
 <hr/>
 
@@ -253,7 +256,8 @@ require("flutter-tools").setup {
     -- takes a log_line as string argument; returns a boolean or nil;
     -- the log_line is only added to the output if the function returns true
     notify_errors = false, -- if there is an error whilst running then notify the user
-    open_cmd = "tabedit", -- command to use to open the log buffer
+    open_cmd = "15split", -- command to use to open the log buffer
+    focus_on_open = true, -- focus on the newly opened log window
   },
   dev_tools = {
     autostart = false, -- autostart devtools server if not detected
@@ -335,7 +339,8 @@ require('flutter-tools').setup_project({
     name = 'Web',
     device = 'chrome',
     flavor = 'WebApp',
-    web_port = 4000
+    web_port = "4000",
+    additional_args = { "--wasm" }
   },
   {
     name = 'Profile',
@@ -438,10 +443,6 @@ use 'mfussenegger/nvim-dap'
 This plugin integrates with [nvim-dap](https://github.com/mfussenegger/nvim-dap) to provide debug capabilities.
 Currently if `debugger.enabled` is set to `true` in the user's config **it will expect `nvim-dap` to be installed**.
 If `dap` is this plugin will use `flutter` or `dart` native debugger to debug your project.
-
-To use the debugger you need to run `:lua require('dap').continue()<CR>`. This will start your app. You should then be able
-to use `dap` commands to begin to debug it. For more information on how to use `nvim-dap` please read the project's README
-or see `:h dap`. Note that running the app this way will prevent commands such as `:FlutterRestart`, `:FlutterReload` from working.
 
 You can use the `debugger.register_configurations` to register custom runner configuration (for example for different targets or flavor).
 If your flutter repo contains launch configurations in `.vscode/launch.json` you can use them via this config :

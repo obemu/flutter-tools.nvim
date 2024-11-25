@@ -66,7 +66,7 @@ end
 ---@param is_err boolean if this is stdout or stderr
 local function on_run_data(is_err, data)
   if is_err and config.dev_log.notify_errors then ui.notify(data, ui.ERROR, { timeout = 5000 }) end
-  dev_log.log(data, config.dev_log)
+  dev_log.log(data)
 end
 
 local function shutdown()
@@ -135,6 +135,7 @@ local function get_run_args(opts, conf)
   local flutter_mode = conf and conf.flutter_mode
   local web_port = conf and conf.web_port
   local dev_url = dev_tools.get_url()
+  local additional_args = conf and conf.additional_args
 
   if not use_debugger_runner() then vim.list_extend(args, { "run" }) end
   if not cmd_args and device then vim.list_extend(args, { "-d", device }) end
@@ -158,6 +159,7 @@ local function get_run_args(opts, conf)
     end -- else default to debug
   end
   if dev_url then vim.list_extend(args, { "--devtools-server-address", dev_url }) end
+  if additional_args then vim.list_extend(args, additional_args) end
   return args
 end
 
