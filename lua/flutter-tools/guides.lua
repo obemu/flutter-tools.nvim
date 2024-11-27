@@ -1,7 +1,7 @@
 local lazy = require("flutter-tools.lazy")
 local ui = lazy.require("flutter-tools.ui") ---@module "flutter-tools.ui"
 local utils = lazy.require("flutter-tools.utils") ---@module "flutter-tools.utils"
-local flutter_config = lazy.require("flutter-tools.config") ---@module "flutter-tools.config"
+local conf = lazy.require("flutter-tools.config") ---@module "flutter-tools.config"
 
 local M = {}
 
@@ -158,6 +158,10 @@ end
 ---@param config table<string, any>
 function M.setup(config)
   local color = config.color or utils.get_hl("Normal", "fg")
+
+  local debug_log = utils.create_debug_log(config.debug)
+  debug_log("widget_guides color: " .. vim.inspect(color))
+
   if color and color ~= "" then
     utils.highlight(hl_group, { foreground = color, default = true })
   end
@@ -171,7 +175,7 @@ local function is_buf_valid(bufnum)
 end
 
 function M.widget_guides(_, data, _, _)
-  local conf = flutter_config.widget_guides
+  local conf = conf.widget_guides
   if conf.enabled then
     local bufnum = vim.uri_to_bufnr(data.uri)
     if not is_buf_valid(bufnum) then return end

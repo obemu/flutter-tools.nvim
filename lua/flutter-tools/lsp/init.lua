@@ -27,13 +27,6 @@ local function merge_config(default, user)
   return vim.tbl_deep_extend("force", default or {}, user or {})
 end
 
-local function create_debug_log(level)
-  return function(msg)
-    local levels = require("flutter-tools.config").debug_levels
-    if level <= levels.DEBUG then require("flutter-tools.ui").notify(msg, level) end
-  end
-end
-
 ---Handle progress notifications from the server
 ---@param err table
 ---@param result table
@@ -140,7 +133,7 @@ M.on_document_color = color.on_document_color
 function M.dart_lsp_super()
   local conf = require("flutter-tools.config")
   local user_config = conf.lsp
-  local debug_log = create_debug_log(user_config.debug)
+  local debug_log = utils.create_debug_log(user_config.debug)
   local client = lsp_utils.get_dartls_client()
   if client == nil then
     debug_log("No active dartls server found")
@@ -160,7 +153,7 @@ local function get_server_config(user_config, callback)
   executable.get(function(paths)
     local defaults = get_defaults({ flutter_sdk = paths.flutter_sdk })
     local root_path = paths.dart_sdk
-    local debug_log = create_debug_log(user_config.debug)
+    local debug_log = utils.create_debug_log(user_config.debug)
     debug_log(fmt("dart_sdk_path: %s", root_path))
 
     config.cmd = config.cmd or { paths.dart_bin, "language-server", "--protocol=lsp" }
@@ -193,7 +186,7 @@ end
 function M.attach()
   local conf = require("flutter-tools.config")
   local user_config = conf.lsp
-  local debug_log = create_debug_log(user_config.debug)
+  local debug_log = utils.create_debug_log(user_config.debug)
   debug_log("attaching LSP")
 
   local buf = api.nvim_get_current_buf()
@@ -203,10 +196,10 @@ function M.attach()
 
   get_server_config(user_config, function(c)
     c.root_dir = M.get_lsp_root_dir()
-      or fs.dirname(fs.find(conf.root_patterns, {
-        path = buffer_path,
-        upward = true,
-      })[1])
+        or fs.dirname(fs.find(conf.root_patterns, {
+          path = buffer_path,
+          upward = true,
+        })[1])
     vim.lsp.start(c)
   end)
 end

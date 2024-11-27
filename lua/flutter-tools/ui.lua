@@ -11,13 +11,7 @@ local entry_type = {
 ---@alias SelectionEntry {text: string, type: EntryType, data: T}
 
 ---@enum
-local M = {
-  ERROR = vim.log.levels.ERROR,
-  DEBUG = vim.log.levels.DEBUG,
-  INFO = vim.log.levels.INFO,
-  TRACE = vim.log.levels.TRACE,
-  WARN = vim.log.levels.WARN,
-}
+local M = vim.log.levels
 
 local api = vim.api
 local namespace_id = api.nvim_create_namespace("flutter_tools_popups")
