@@ -146,6 +146,15 @@ function M.emit_event(event, opts)
   api.nvim_exec_autocmds("User", { pattern = event, data = data })
 end
 
+---@param level integer See vim.log.levels
+function M.create_debug_log(level)
+  return function(msg)
+    local levels = vim.log.levels
+    if level > levels.DEBUG then return end
+    require("flutter-tools.ui").notify(msg, level)
+  end
+end
+
 -- TODO: Remove after compatibility with Neovim=0.9 is dropped
 M.islist = vim.fn.has("nvim-0.10") == 1 and vim.islist or vim.tbl_islist
 local flatten = function(t) return vim.iter(t):flatten():totable() end

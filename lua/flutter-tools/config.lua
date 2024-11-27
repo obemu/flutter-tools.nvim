@@ -70,7 +70,7 @@ local config = {
   fvm = false,
   widget_guides = {
     enabled = false,
-    debug = false,
+    debug = vim.log.levels.TRACE,
     color = nil,
   },
   ui = {
