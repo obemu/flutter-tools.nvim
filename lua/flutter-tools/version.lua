@@ -73,7 +73,7 @@ end
 ---@param version_str string
 ---@return flutter.SemVer?
 local function _parse_semver(version_str)
-  local major, minor, patch = string.match(version_str, "(%d)%.(%d)%.(%d)")
+  local major, minor, patch = string.match(version_str, "(%d+)%.(%d+)%.(%d+)")
   if nil == major or nil == minor or nil == patch then
     return nil
   end
