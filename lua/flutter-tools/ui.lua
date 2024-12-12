@@ -135,8 +135,8 @@ function M.open_win(opts, on_open)
   local win = api.nvim_get_current_win()
   local buf = api.nvim_get_current_buf()
   vim.bo[buf].filetype = opts.filetype
-  vim.bo[buf].swapfile = false
-  vim.bo[buf].buftype = "nofile"
+  vim.bo[buf].swapfile = opts.swapfile or false
+  vim.bo[buf].buftype = opts.buftype or "nofile"
   if on_open then on_open(buf, win) end
   if not opts.focus_on_open then
     -- Switch back to the previous window
