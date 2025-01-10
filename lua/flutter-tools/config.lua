@@ -142,7 +142,9 @@ local config = {
     notify_errors = false,
     focus_on_open = true,
     open_cmd = utils.get_split_cmd(0.4, 50),
-  },
+    create_file = false,
+    overwrite = true,
+  }, 
   dev_tools = {
     autostart = false,
     auto_open_browser = false,
