@@ -108,15 +108,22 @@ local config = {
   outline = setmetatable({
     auto_open = false,
   }, {
-    __index = function(_, k) return k == "open_cmd" and get_split_cmd(0.3, 40) or nil end,
+    __index = function(_, k)
+      return k == "open_cmd" and get_split_cmd(0.3, 40) or nil
+    end,
   }),
   dev_log = setmetatable({
+    debug = M.debug_levels.WARN,
     filter = nil,
     enabled = true,
     notify_errors = false,
     focus_on_open = true,
+    create_file = false,
+    filepath = nil,
   }, {
-    __index = function(_, k) return k == "open_cmd" and get_split_cmd(0.4, 50) or nil end,
+    __index = function(_, k)
+      return k == "open_cmd" and get_split_cmd(0.4, 50) or nil
+    end,
   }),
   dev_tools = {
     autostart = false,
