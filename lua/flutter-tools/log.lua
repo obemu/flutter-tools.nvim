@@ -44,7 +44,6 @@ local Path = lazy.require("plenary.path") ---@module "plenary.path"
 --------------------------------
 
 local api = vim.api
-local fmt = string.format
 
 local M = {}
 
@@ -54,7 +53,7 @@ local dev_log_config = nil
 ---@type string
 local log_filename = "__FLUTTER_DEV_LOG__"
 
---- The physical log file, if it exists.
+--- The physical log file, or nil if none exists.
 ---
 ---@type flutter.LogFile|nil
 local log_file = nil
@@ -77,6 +76,8 @@ local function notify_setup_required() ui.notify("The log module has not been se
 ---@type fun(msg: any)
 local debug_log = function(_) notify_setup_required() end
 
+--- Returns the |Path| to the directory that contains the physical log files.
+---
 ---@return Path
 local function get_log_dirpath() return Path:new(vim.fn.stdpath("log"), "flutter-tools") end
 
@@ -95,8 +96,8 @@ end
 
 --- Called whenever the log buffer is entered by the user.
 local function on_log_buf_enter()
-  log_buf = vim.api.nvim_get_current_buf()
-  log_win = vim.api.nvim_get_current_win()
+  log_buf = api.nvim_get_current_buf()
+  log_win = api.nvim_get_current_win()
 
   vim.cmd("set filetype=log")
   vim.bo[log_buf].modifiable = false
@@ -119,13 +120,14 @@ local function autoscroll()
   local buf_length = api.nvim_buf_line_count(log_buf)
   local success, err = pcall(api.nvim_win_set_cursor, log_win, { buf_length, 0 })
   if not success then
-    ui.notify(fmt("Failed to set cursor for log window %s: %s", log_win, err), ui.ERROR, {
+    ui.notify(string.format("Failed to set cursor for log window %s: %s", log_win, err), ui.ERROR, {
       once = true,
     })
   end
 end
 
----Add lines to a buffer
+--- Add lines to the log buffer.
+---
 ---@param lines string[]
 local function append(lines)
   assert(nil ~= dev_log_config)
@@ -187,7 +189,7 @@ local function create_physical_file()
   }
   debug_log("Created physical log file '" .. tostring(filepath) .. "'")
 
-  vim.api.nvim_create_autocmd({ "ExitPre" }, {
+  api.nvim_create_autocmd({ "ExitPre" }, {
     callback = function(_)
       if not log_file then return end
       debug_log("Closing log file")
@@ -292,15 +294,11 @@ function M.log(data)
   -- Check if data should be logged, if a filter has been provided.
   if opts.filter and not opts.filter(data) then return end
 
-  local function do_log()
-    append({ data })
-    autoscroll()
-  end
-
   -- Create the log buffer, if it does not exist already.
   if not exists() then create() end
 
-  do_log()
+  append({ data })
+  autoscroll()
 end
 
 --- Clear the contents of the log buffer.
