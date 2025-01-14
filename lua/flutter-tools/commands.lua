@@ -397,10 +397,25 @@ function M.copy_profiler_url()
     vim.cmd("let @+='" .. url .. "'")
     ui.notify("Profiler url copied to clipboard!")
   elseif is_running then
-    ui.notify("Wait while the app starts", "please try again later")
+    ui.notify("Wait while the app starts, please try again later")
   else
     ui.notify("You must start the DevTools server first!")
   end
+end
+
+function M.copy_log_filepath()
+  local filepath = dev_log.get_filepath()
+
+  if not filepath then
+    ui.notify(
+      "You must set the configuration option 'dev_log.create_file' to true, "
+        .. "otherwise there is no physical log file."
+    )
+    return
+  end
+
+  vim.cmd("let @+='" .. tostring(filepath) .. "'")
+  ui.notify("Path to logfile copied to clipboard!")
 end
 
 ---@param quiet boolean?
