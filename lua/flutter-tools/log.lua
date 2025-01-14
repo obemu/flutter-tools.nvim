@@ -233,6 +233,13 @@ end
 --      Public functions      --
 --------------------------------
 
+--- Get the path to the physical log file, or nil if there is no physical file.
+---
+--- A physical file only exists, if |config.dev_log.create_file| is set to true.
+---
+---@return Path|nil
+function M.get_filepath() return nil ~= log_file and log_file.filepath or nil end
+
 --- Check if the log window is open.
 ---
 ---@return boolean
