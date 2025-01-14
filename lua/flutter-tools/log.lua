@@ -95,6 +95,9 @@ end
 
 --- Called whenever the log buffer is entered by the user.
 local function on_log_buf_enter()
+  log_buf = vim.api.nvim_get_current_buf()
+  log_win = vim.api.nvim_get_current_win()
+
   vim.cmd("set filetype=log")
   vim.bo[log_buf].modifiable = false
   vim.bo[log_buf].modified = false
@@ -183,6 +186,15 @@ local function create_physical_file()
     size = size,
   }
   debug_log("Created physical log file '" .. tostring(filepath) .. "'")
+
+  vim.api.nvim_create_autocmd({ "ExitPre" }, {
+    callback = function(_)
+      if not log_file then return end
+      debug_log("Closing log file")
+      log_file = nil
+      vim.uv.fs_close(fd)
+    end,
+  })
 end
 
 ---@param on_created? fun()
@@ -196,13 +208,9 @@ local function create(on_created)
     filename = log_filename,
   }
 
-  if dev_log_config.create_file then create_physical_file() end
-
   debug_log("Now opening log file with options:\n" .. vim.inspect(opts))
 
   ui.open_win(opts, function(buf, win)
-    debug_log("opening log windows")
-
     if not buf then
       ui.notify("Failed to open the dev log as the buffer could not be found", ui.ERROR)
       return
@@ -302,6 +310,8 @@ function M.clear()
   vim.bo[log_buf].modifiable = true
   api.nvim_buf_set_lines(log_buf, 0, -1, false, {})
   vim.bo[log_buf].modifiable = false
+
+  if log_file then vim.uv.fs_ftruncate(log_file.fd, 0) end
 end
 
 --- Open the log window, if it is closed.
@@ -354,6 +364,8 @@ function M.setup(config)
     parents = true,
     mode = 493, -- decimal for 755 octal
   })
+
+  if dev_log_config.create_file then create_physical_file() end
 end
 
 -----------------------------
