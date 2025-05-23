@@ -149,4 +149,13 @@ end
 M.islist = vim.islist
 M.flatten = function(t) return vim.iter(t):flatten():totable() end
 
+--- Create a proportional split using a percentage specified as a float.
+---
+---@param percentage number
+---@param fallback number
+---@return string
+function M.get_split_cmd(percentage, fallback)
+  return ("botright %dvnew"):format(math.max(vim.o.columns * percentage, fallback))
+end
+
 return M
