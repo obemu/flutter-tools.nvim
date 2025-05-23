@@ -78,14 +78,6 @@ local function validate_prefs(prefs)
   end
 end
 
----Create a proportional split using a percentage specified as a float
----@param percentage number
----@param fallback number
----@return string
-local function get_split_cmd(percentage, fallback)
-  return ("botright %dvnew"):format(math.max(vim.o.columns * percentage, fallback))
-end
-
 local function get_default_lookup()
   local exepath = fn.exepath("flutter")
   local is_snap_installation = exepath and exepath:match("snap") or false
@@ -139,19 +131,18 @@ local config = {
       background_color = nil,
     },
   },
-  outline = setmetatable({
+  outline = {
     auto_open = false,
-  }, {
-    __index = function(_, k) return k == "open_cmd" and get_split_cmd(0.3, 40) or nil end,
-  }),
-  dev_log = setmetatable({
+    open_cmd = utils.get_split_cmd(0.3, 40),
+  },
+  dev_log = {
+    debug = M.debug_levels.WARN,
     filter = nil,
     enabled = true,
     notify_errors = false,
     focus_on_open = true,
-  }, {
-    __index = function(_, k) return k == "open_cmd" and get_split_cmd(0.4, 50) or nil end,
-  }),
+    open_cmd = utils.get_split_cmd(0.4, 50),
+  },
   dev_tools = {
     autostart = false,
     auto_open_browser = false,
