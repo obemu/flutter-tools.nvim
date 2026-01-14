@@ -53,6 +53,7 @@ local function setup_commands()
   --- Log
   command("FlutterLogClear", log.clear)
   command("FlutterLogToggle", log.toggle)
+  command("FlutterLogCopyFilepath", commands.copy_log_filepath)
   --- LSP
   command("FlutterSuper", lsp.dart_lsp_super)
   command("FlutterReanalyze", lsp.dart_reanalyze)
@@ -61,6 +62,8 @@ end
 
 local _has_started = false
 local _has_setup = false
+
+local AUGROUP = api.nvim_create_augroup("FlutterToolsGroup", { clear = true })
 
 ---Initialise various plugin modules
 function M.start()
@@ -76,12 +79,12 @@ function M.start()
 
   _has_started = true
   setup_commands()
+  if config.dev_log.enabled then log.setup(config.dev_log) end
   if config.debugger.enabled then dap.setup(config) end
   if config.widget_guides.enabled then guides.setup() end
   if config.decorations then decorations.apply(config.decorations) end
 end
 
-local AUGROUP = api.nvim_create_augroup("FlutterToolsGroup", { clear = true })
 ---Create autocommands for the plugin
 local function setup_autocommands()
   local autocmd = api.nvim_create_autocmd
@@ -118,11 +121,6 @@ local function setup_autocommands()
     group = AUGROUP,
     pattern = { "*/pubspec.yaml" },
     callback = function() commands.pub_get() end,
-  })
-  autocmd({ "BufEnter" }, {
-    group = AUGROUP,
-    pattern = { log.filename },
-    callback = function() log.__resurrect() end,
   })
   autocmd({ "VimLeavePre" }, {
     group = AUGROUP,
