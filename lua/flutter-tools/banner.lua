@@ -36,6 +36,9 @@ local on_cleared_listeners = {}
 
 local has_started_cleansing = false
 
+---@type uv.uv_timer_t?
+local cache_clear_timer = nil
+
 local M = {
   PATTERNS = {
     FLUTTER_NEW_VERSION = "A new version of Flutter is available!",
@@ -57,7 +60,9 @@ local function detect_banners(lines)
       banners.has_flutter_new_version = true
     end
 
-    if nil ~= line:match(M.PATTERNS.FLUTTER_WELCOME) then banners.has_flutter_welcome = true end
+    if nil ~= line:match(M.PATTERNS.FLUTTER_WELCOME) then
+      banners.has_flutter_welcome = true
+    end
   end
 
   return banners
@@ -69,6 +74,23 @@ end
 ---
 ---@param detected_banners flutter.DetectedBanners
 local function on_cleared_banners(detected_banners)
+  -- The cache needs to be cleaned after a certain time, otherwise the error
+  -- from issue #495 (https://github.com/nvim-flutter/flutter-tools.nvim/pull/495)
+  -- appears again.
+  --
+  -- This happens, because the Flutter CLI tool notifies the user again, if the
+  -- last notification is at least `maxTimeSinceLastWarning` (https://github.com/flutter/flutter/blob/3.35.7/packages/flutter_tools/lib/src/version.dart#L1204)
+  -- old. This can be seen in the `VersionFreshnessValidator.run` (https://github.com/flutter/flutter/blob/3.35.7/packages/flutter_tools/lib/src/version.dart#L1262).
+  --
+  -- To fix this problem, we clear the cache before `maxTimeSinceLastWarning`
+  -- is reached.
+  if cache_clear_timer == nil then
+    cache_clear_timer = vim.defer_fn(
+      function() M.reset_cache() end,
+      20 * 3600 * 1000
+    )
+  end
+
   local listeners = vim.deepcopy(on_cleared_listeners)
   on_cleared_listeners = {}
   vim.schedule(function()
@@ -142,6 +164,12 @@ function M.reset_cache()
   cached_banners = nil
   on_cleared_listeners = {}
   has_started_cleansing = false
+
+  if cache_clear_timer ~= nil then
+    cache_clear_timer:stop()
+    cache_clear_timer:close()
+    cache_clear_timer = nil
+  end
 end
 
 return M
